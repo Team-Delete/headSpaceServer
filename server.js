@@ -20,6 +20,8 @@ app.get('/', (request, response) => {
   response.send('hello from the headSpace test');
 });
 
+// seed database with a user
+
 // creating routes and callbacks
 
 // to get users (for building purposes, will remove this route after we can see created data)
