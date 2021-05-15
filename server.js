@@ -7,6 +7,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 app.use(express.json());
 require('dotenv').config();
+const superagent = require('superagent');
 
 // make sure you have dotenv installed as a dependency and you've created your own .env file
 const PORT = process.env.PORT || 3001;
@@ -27,6 +28,9 @@ app.get('/', (request, response) => {
 
 // to get moods for a specific user
 // app.get('/moods')
+
+const getWeather = require('./handlers/getWeather');
+app.get('/weather', getWeather);
 
 // to "submit" a mood for a user (create a mood object)
 // app.post('/moods')
