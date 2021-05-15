@@ -6,10 +6,14 @@ const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
+
+const superagent = require('superagent');
+
 app.use(express.json());
 
 // requiring the "user" schema
 const User = require('./schemas');
+
 
 // make sure you have dotenv installed as a dependency and you've created your own .env file
 const PORT = process.env.PORT || 3001;
@@ -64,6 +68,13 @@ app.get('/users/:email', (request, response) => {
   });
 });
 
+
+const getWeather = require('./handlers/getWeather');
+app.get('/weather', getWeather);
+
+// to "submit" a mood for a user (create a mood object)
+// app.post('/moods')
+
 // To Do: get moods for a specific user
 app.get('/moods/:email', (request, response) => {
   let email = request.params.email;
@@ -72,6 +83,7 @@ app.get('/moods/:email', (request, response) => {
     response.send(userData[0].moods);
   });
 });
+
 
 // DONE: "submit" a mood for a user (create a mood object)
 // To Do: Make sure it works dynamically with the front end
