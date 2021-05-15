@@ -5,8 +5,11 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
-app.use(express.json());
 require('dotenv').config();
+app.use(express.json());
+
+// requiring the "user" schema
+const User = require('./schemas');
 
 // make sure you have dotenv installed as a dependency and you've created your own .env file
 const PORT = process.env.PORT || 3001;
@@ -20,12 +23,46 @@ app.get('/', (request, response) => {
   response.send('hello from the headSpace test');
 });
 
-// seed database with a user
+// seed database with a user with no moods, commented out to avoid unused variables after initial save
+// const newUser = new User({
+//   email: '',
+//   name: '',
+//   moods: []
+// });
+
+
+//code below saves user to DB and returns console log
+// newUser.save(function (err) {
+//   if (err) console.log(err);
+//   else console.log('it liiiiiives!', newUser);
+// });
 
 // creating routes and callbacks
 
-// to get users (for building purposes, will remove this route after we can see created data)
-// app.get('/users')
+// to get all existing users (for building purposes, will remove this route after we can see created data)
+app.get('/users', (request, response) => {
+  User.find((err, responseData) => {
+    if (err) console.log(err);
+    else response.send(responseData);
+  });
+});
+
+// to get a specific user, and to create a new one if user doesn't already exist
+app.get('users/:email', (request, response) => {
+  let email = request.params.email;
+  User.find({email: email}, (err, userData) =>{
+    if(userData.length < 1) {
+      // creates a new user
+      let newUser = new User({email: request.params.email});
+      newUser.save().then(newUserData => {
+        console.log('here is new user data', newUserData);
+        response.send([newUserData]);
+      });
+    } else {
+      response.send(userData);
+    }
+  });
+});
 
 // to get moods for a specific user
 // app.get('/moods')
