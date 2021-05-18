@@ -77,7 +77,7 @@ app.get('/weather', getWeather);
 
 // To Do: get moods for a specific user
 app.get('/moods/:email', (request, response) => {
-  let email = request.params.email;
+  let email = request.query.email;
   User.find({email: email}, (err, userData) => {
     console.log(userData[0].moods);
     response.send(userData[0].moods);
