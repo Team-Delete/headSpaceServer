@@ -77,7 +77,11 @@ app.get('/weather', getWeather);
 
 // To Do: get moods for a specific user
 app.get('/moods/:email', (request, response) => {
-  let email = request.query.email;
+  // if I hard code my email, the request works:
+  // let email = 'kassie.r.bradshaw@gmail.com';
+  // request.params.email WORKS if browser reads: /moods/[user email]
+  let email = request.params.email;
+  console.log('here is request.params', request.params);
   User.find({email: email}, (err, userData) => {
     console.log(userData[0].moods);
     response.send(userData[0].moods);
@@ -99,8 +103,8 @@ app.post('/moods', (request, response) => {
       user.moods.push({
         mood: request.body.mood,
         note: request.body.note,
-        color: request.body.color,
-        number: request.body.number
+        date: request.body.date,
+
       });
       user.save().then((userData) => {
         console.log(userData);
@@ -113,17 +117,17 @@ app.post('/moods', (request, response) => {
 // DONE: can update a mood's note if the user desires
 // To Do: make sure it works dynamically with front end
 app.put('/moods/:id', (request, response) => {
-  // email will = request.body.user;
-  let email = 'kassie.r.bradshaw@gmail.com';
+  let email = request.query.email;
   User.find({email: email}, (err, userData) => {
     console.log('this is userData', userData);
     // moodId will = request.params.id;
-    let moodId = '60a026dd3e5cc418db153a05';
+    let moodId = request.params.id;
     let user = userData[0];
     user.moods.forEach(mood => {
       if(`${mood._id}` === moodId) {
         // we found the correct mood, update the note
         mood.note = request.body.note;
+        mood.mood = request.body.mood;
       }
     });
     // save the updated mood note
@@ -136,14 +140,13 @@ app.put('/moods/:id', (request, response) => {
 // DONE: delete a mood from a user's history
 // TO DO: Make sure it works dynamically with front end
 app.delete('/moods/:id', (request, response) => {
-  // email will = request.query
-  let email = 'kassie.r.bradshaw@gmail.com';
-  // id will = request.params.id
-  let id = '60a0273b3e5cc418db153a06';
+  let email = request.query.email;
+  let id = request.params.id;
   User.find({email: email}, (err, userData) => {
     let user = userData[0];
     user.moods = user.moods.filter(mood => `${mood._id}` !== id);
     user.save().then(userData => {
+      console.log(userData.moods);
       response.status(200).send(userData.moods);
     });
   });
