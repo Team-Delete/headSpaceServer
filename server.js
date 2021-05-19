@@ -7,7 +7,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const superagent = require('superagent');
+// const superagent = require('superagent');
 
 app.use(express.json());
 
@@ -23,9 +23,9 @@ app.use(cors());
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 // DONE: test to see if server is working <-- yup, it's working
-// app.get('/', (request, response) => {
-//   response.send('hello from the headSpace test');
-// });
+app.get('/', (request, response) => {
+  response.send('hello from the headSpace test');
+});
 
 // DONE: seed database with a user with no moods, commented out to avoid unused variables after initial save
 // const newUser = new User({
@@ -77,7 +77,7 @@ app.get('/weather', getWeather);
 
 // To Do: get moods for a specific user
 app.get('/moods/:email', (request, response) => {
-  let email = request.params.email;
+  let email = request.query.email;
   User.find({email: email}, (err, userData) => {
     console.log(userData[0].moods);
     response.send(userData[0].moods);
