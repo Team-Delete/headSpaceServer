@@ -25,6 +25,14 @@ app.get('/', (request, response) => {
   response.send('hello from the headSpace test');
 });
 
+// DONE: seed database with a user with no moods, commented out to avoid unused variables after initial save
+// const newUser = new User({
+//   email: '',
+//   name: '',
+//   moods: []
+// });
+
+
 const getWeather = require('./handlers/getWeather');
 app.get('/weather', getWeather);
 
@@ -63,11 +71,7 @@ app.get('/users/:email', (request, response) => {
 
 // To Do: get moods for a specific user
 app.get('/moods/:email', (request, response) => {
-  // if I hard code my email, the request works:
-  // let email = 'kassie.r.bradshaw@gmail.com';
-  // request.params.email WORKS if browser reads: /moods/[user email]
   let email = request.params.email;
-  console.log('here is request.params', request.params);
   User.find({email: email}, (err, userData) => {
     if (err) {
       console.log(err);
