@@ -7,8 +7,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const superagent = require('superagent');
-
 app.use(express.json());
 
 // requiring the "user" schema
@@ -23,28 +21,18 @@ app.use(cors());
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 // DONE: test to see if server is working <-- yup, it's working
-// app.get('/', (request, response) => {
-//   response.send('hello from the headSpace test');
-// });
+app.get('/', (request, response) => {
+  response.send('hello from the headSpace test');
+});
 
-// DONE: seed database with a user with no moods, commented out to avoid unused variables after initial save
-// const newUser = new User({
-//   email: '',
-//   name: '',
-//   moods: []
-// });
-
-
-//DONE: code below saves user to DB and returns console log
-// newUser.save(function (err) {
-//   if (err) console.log(err);
-//   else console.log('it liiiiiives!', newUser);
-// });
+const getWeather = require('./handlers/getWeather');
+app.get('/weather', getWeather);
 
 // creating routes and callbacks
 
 // DONE: to get all existing users (for building purposes, will remove this route after we can see created data)
 app.get('/users', (request, response) => {
+  console.log(request.data);
   User.find((err, responseData) => {
     if (err) console.log(err);
     else response.send(responseData);
@@ -62,25 +50,32 @@ app.get('/users/:email', (request, response) => {
         console.log('here is new user data', newUserData);
         response.send([newUserData]);
       });
-    } else {
+    } if (err) {
+      console.log(err);
+      response.send(err);
+    }else {
       response.send(userData);
     }
   });
 });
 
 
-const getWeather = require('./handlers/getWeather');
-app.get('/weather', getWeather);
-
-// to "submit" a mood for a user (create a mood object)
-// app.post('/moods')
 
 // To Do: get moods for a specific user
 app.get('/moods/:email', (request, response) => {
+  // if I hard code my email, the request works:
+  // let email = 'kassie.r.bradshaw@gmail.com';
+  // request.params.email WORKS if browser reads: /moods/[user email]
   let email = request.params.email;
+  console.log('here is request.params', request.params);
   User.find({email: email}, (err, userData) => {
-    console.log(userData[0].moods);
-    response.send(userData[0].moods);
+    if (err) {
+      console.log(err);
+      response.send(err);
+    } else {
+      console.log(userData[0].moods);
+      response.send(userData[0].moods);
+    }
   });
 });
 
@@ -94,13 +89,14 @@ app.post('/moods', (request, response) => {
     console.log('this is responseData', responseData);
     if (responseData.length < 1) {
       response.status(400).send('user does not exist');
-    } else {
+    } if (err) {
+      console.log(err);
+      response.send(err);
+    }else {
       let user = responseData[0];
       user.moods.push({
         mood: request.body.mood,
         note: request.body.note,
-        color: request.body.color,
-        number: request.body.number
       });
       user.save().then((userData) => {
         console.log(userData);
@@ -113,39 +109,46 @@ app.post('/moods', (request, response) => {
 // DONE: can update a mood's note if the user desires
 // To Do: make sure it works dynamically with front end
 app.put('/moods/:id', (request, response) => {
-  // email will = request.body.user;
-  let email = 'kassie.r.bradshaw@gmail.com';
+  let email = request.body.email;
   User.find({email: email}, (err, userData) => {
-    console.log('this is userData', userData);
-    // moodId will = request.params.id;
-    let moodId = '60a026dd3e5cc418db153a05';
-    let user = userData[0];
-    user.moods.forEach(mood => {
-      if(`${mood._id}` === moodId) {
-        // we found the correct mood, update the note
-        mood.note = request.body.note;
-      }
-    });
-    // save the updated mood note
-    user.save().then(savedUserData => {
-      response.send(savedUserData.moods);
-    });
+    if (err) {
+      console.log(err);
+      response.send(err);
+    } else {
+      console.log('this is userData', userData);
+      let moodId = request.params.id;
+      let user = userData[0];
+      user.moods.forEach(mood => {
+        if(`${mood._id}` === moodId) {
+          // we found the correct mood, update the note
+          mood.note = request.body.note;
+        }
+      });
+      // save the updated mood note
+      user.save().then(savedUserData => {
+        response.send(savedUserData.moods);
+      });
+    }
   });
 });
 
 // DONE: delete a mood from a user's history
 // TO DO: Make sure it works dynamically with front end
 app.delete('/moods/:id', (request, response) => {
-  // email will = request.query
-  let email = 'kassie.r.bradshaw@gmail.com';
-  // id will = request.params.id
-  let id = '60a0273b3e5cc418db153a06';
+  let email = request.query.email;
+  let id = request.params.id;
+  // let id = '60a0273b3e5cc418db153a06';
   User.find({email: email}, (err, userData) => {
-    let user = userData[0];
-    user.moods = user.moods.filter(mood => `${mood._id}` !== id);
-    user.save().then(userData => {
-      response.status(200).send(userData.moods);
-    });
+    if (err) {
+      console.log(err);
+      response.send(err);
+    } else {
+      let user = userData[0];
+      user.moods = user.moods.filter(mood => `${mood._id}` !== id);
+      user.save().then(userData => {
+        response.status(200).send(userData.moods);
+      });
+    }
   });
 });
 

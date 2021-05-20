@@ -8,9 +8,7 @@ const moodSchema = new Schema({
   email: {type: String},
   mood: {type: String},
   note: {type: String},
-  color: {type: String},
-  number: {type: Number},
-  // date: date.now(); <-- how do I get this default working?
+
 });
 
 // this will be the structure of each user, and it will contain all their previously voted moods

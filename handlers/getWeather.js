@@ -2,13 +2,14 @@ const superagent = require('superagent');
 
 function getWeather(request, response) {
   const weatherQuery = request.query.weatherSearch;
+  console.log(weatherQuery);
   const url = 'https://api.weatherbit.io/v2.0/forecast/daily';
   const query = {
     cityName: request.query.cityName,
     key: process.env.WEATHERBIT_API_KEY,
     lat: request.query.lat,
     lon: request.query.lon,
-  }
+  };
   superagent
     .get(url)
     .query(query)
@@ -16,7 +17,7 @@ function getWeather(request, response) {
       response.json(weatherData.body.data.map(day => (
         new Forecast(day))));
     });
-};
+}
 
 function Forecast(day) {
   this.date = day.datetime;
