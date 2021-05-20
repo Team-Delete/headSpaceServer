@@ -141,7 +141,6 @@ app.put('/moods/:id', (request, response) => {
 app.delete('/moods/:id', (request, response) => {
   let email = request.query.email;
   let id = request.params.id;
-  // let id = '60a0273b3e5cc418db153a06';
   User.find({email: email}, (err, userData) => {
     if (err) {
       console.log(err);

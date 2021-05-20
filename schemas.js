@@ -5,10 +5,8 @@ const { Schema } = mongoose;
 
 // this will be the structure of a "mood object"
 const moodSchema = new Schema({
-  email: {type: String},
   mood: {type: String},
   note: {type: String},
-
 });
 
 // this will be the structure of each user, and it will contain all their previously voted moods
