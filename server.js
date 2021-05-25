@@ -18,6 +18,7 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 
 // DONE: connecting us to the mongoDB hosted on Atlas <-- persistent storage!
+// MONGODB_URI needs to be in your README directions for what to add to your .env file
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 // DONE: test to see if server is working <-- yup, it's working
@@ -25,14 +26,7 @@ app.get('/', (request, response) => {
   response.send('hello from the headSpace test');
 });
 
-// DONE: seed database with a user with no moods, commented out to avoid unused variables after initial save
-// const newUser = new User({
-//   email: '',
-//   name: '',
-//   moods: []
-// });
-
-
+// it's weird that this one function is modularized while the others are not
 const getWeather = require('./handlers/getWeather');
 app.get('/weather', getWeather);
 
@@ -48,6 +42,7 @@ app.get('/users', (request, response) => {
 });
 
 // DONE: to get a specific user, and to create a new one if user doesn't already exist
+// This code looks nice, but isn't ever called by your frontend, so your server can't create new users.
 app.get('/users/:email', (request, response) => {
   let email = request.params.email;
   User.find({email: email}, (err, userData) =>{
@@ -76,7 +71,16 @@ app.get('/moods/:email', (request, response) => {
     if (err) {
       console.log(err);
       response.send(err);
+    } else if(userData.length < 1) {
+      // creates a new user
+      let newUser = new User({email: request.params.email});
+      newUser.save().then(newUserData => {
+        console.log('here is new user data', newUserData);
+        response.send(newUserData.moods);
+      });
     } else {
+      // This breaks when making a request for a user who does not exist. This crashes your entire server.
+      // You need to handle this case in order to get your code working.
       console.log(userData[0].moods);
       response.send(userData[0].moods);
     }
@@ -93,10 +97,11 @@ app.post('/moods', (request, response) => {
     console.log('this is responseData', responseData);
     if (responseData.length < 1) {
       response.status(400).send('user does not exist');
-    } if (err) {
+      // your if/else if logic was off here. You were trying to send multiple responses if there was no user with that email.
+    } else if (err) {
       console.log(err);
       response.send(err);
-    }else {
+    } else {
       let user = responseData[0];
       user.moods.push({
         mood: request.body.mood,
